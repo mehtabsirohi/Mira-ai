@@ -1,1 +1,108 @@
 
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mira AI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #10142c, #33215c);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .app {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .avatar {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #69e5ff, #b57cff);
+      display: grid;
+      place-items: center;
+      font-size: 54px;
+      box-shadow: 0 0 35px #8a72ff66;
+    }
+    h1 { font-size: 34px; margin: 10px 0; }
+    p { color: #d4d4ee; }
+    #chat {
+      text-align: left;
+      height: 220px;
+      overflow-y: auto;
+      background: #ffffff12;
+      border: 1px solid #ffffff25;
+      border-radius: 16px;
+      padding: 12px;
+      margin: 20px 0;
+    }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    input { background: white; color: #222; }
+    button {
+      background: #8e7aff;
+      color: white;
+      font-weight: bold;
+    }
+    .secondary { background: #34345a; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="avatar">✨</div>
+    <h1>Mira AI</h1>
+    <p>Assalam-o-alaikum! Main Mira hoon.</p>
+    <div id="chat" aria-live="polite">
+      <p><b>Mira:</b> Salam! Aap mujhse baat kar sakte hain.</p>
+    </div>
+    <input id="message" placeholder="Yahan apna paigham likhein">
+    <button onclick="sendMessage()">Send</button>
+    <button class="secondary" onclick="speak()">🔊 Mira ki awaaz suno</button>
+  </main>
+  <script>
+    function sendMessage() {
+      const input = document.getElementById('message');
+      const chat = document.getElementById('chat');
+      const value = input.value.trim();
+      if (!value) return;
+      const user = document.createElement('p');
+      user.textContent = 'Aap: ' + value;
+      chat.appendChild(user);
+      const reply = document.createElement('p');
+      reply.textContent = 'Mira: Shukriya! Main abhi demo mode mein hoon.';
+      chat.appendChild(reply);
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+    }
+    function speak() {
+      if (!('speechSynthesis' in window)) {
+        alert('Is browser mein voice support nahi hai.');
+        return;
+      }
+      const voice = new SpeechSynthesisUtterance(
+        'Assalam o alaikum! Main Mira hoon.'
+      );
+      voice.lang = 'ur-PK';
+      speechSynthesis.speak(voice);
+    }
+  </script>
+</body>
+</html>
+
