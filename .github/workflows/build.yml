@@ -11,15 +11,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
       - name: Create Android project from Mira HTML
         run: |
           mkdir -p www
@@ -37,11 +40,27 @@ jobs:
           EOF
           npx cap add android
           npx cap sync android
+
+      - name: Align Kotlin standard library versions
+        run: |
+          cat > kotlin-resolution.init.gradle <<'EOF'
+          allprojects {
+            configurations.configureEach {
+              resolutionStrategy.eachDependency { details ->
+                if (details.requested.group == 'org.jetbrains.kotlin' &&
+                    details.requested.name.startsWith('kotlin-stdlib')) {
+                  details.useVersion '1.8.22'
+                }
+              }
+            }
+          }
+          EOF
+
       - name: Build APK
-        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+        run: cd android && chmod +x gradlew && ./gradlew -I ../kotlin-resolution.init.gradle assembleDebug
+
       - name: Upload Mira APK
         uses: actions/upload-artifact@v4
         with:
           name: Mira-AI-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          path: android/a
