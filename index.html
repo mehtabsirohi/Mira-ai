@@ -1,108 +1,149 @@
-
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mira AI</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #10142c, #33215c);
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .app {
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-    .avatar {
-      width: 110px;
-      height: 110px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #69e5ff, #b57cff);
-      display: grid;
-      place-items: center;
-      font-size: 54px;
-      box-shadow: 0 0 35px #8a72ff66;
-    }
-    h1 { font-size: 34px; margin: 10px 0; }
-    p { color: #d4d4ee; }
-    #chat {
-      text-align: left;
-      height: 220px;
-      overflow-y: auto;
-      background: #ffffff12;
-      border: 1px solid #ffffff25;
-      border-radius: 16px;
-      padding: 12px;
-      margin: 20px 0;
-    }
-    input, button {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 14px;
-      margin-top: 10px;
-      border: 0;
-      border-radius: 12px;
-      font-size: 16px;
-    }
-    input { background: white; color: #222; }
-    button {
-      background: #8e7aff;
-      color: white;
-      font-weight: bold;
-    }
-    .secondary { background: #34345a; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mira AI</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;padding:20px;
+  font-family:Arial,sans-serif;color:white;
+  background:linear-gradient(145deg,#080d20,#30205a,#101b3b);
+  display:flex;justify-content:center;align-items:center
+}
+.app{width:100%;max-width:450px;text-align:center}
+.avatar{
+  width:105px;height:105px;margin:0 auto 12px;
+  border-radius:50%;display:grid;place-items:center;
+  font-size:48px;background:linear-gradient(135deg,#67e8f9,#a78bfa);
+  box-shadow:0 0 35px #8b5cf688
+}
+h1{margin:8px;font-size:32px}
+.subtitle{color:#c8c8e8}
+.status{color:#86efac;font-size:14px}
+#chat{
+  height:300px;overflow-y:auto;text-align:left;
+  padding:14px;margin:18px 0;background:#ffffff12;
+  border:1px solid #ffffff25;border-radius:18px
+}
+.msg{padding:10px 12px;margin:9px 0;border-radius:12px;
+  background:#ffffff12;overflow-wrap:anywhere}
+.me{background:#51428a}
+input,button{
+  width:100%;padding:14px;margin-top:9px;
+  border:0;border-radius:12px;font-size:16px
+}
+input{background:white;color:#222}
+button{background:#8b7bff;color:white;font-weight:bold}
+.secondary{background:#303052}
+button:active{opacity:.8}
+.note{font-size:12px;color:#c8c8e8;line-height:1.6}
+</style>
 </head>
 <body>
-  <main class="app">
-    <div class="avatar">✨</div>
-    <h1>Mira AI</h1>
-    <p>Assalam-o-alaikum! Main Mira hoon.</p>
-    <div id="chat" aria-live="polite">
-      <p><b>Mira:</b> Salam! Aap mujhse baat kar sakte hain.</p>
-    </div>
-    <input id="message" placeholder="Yahan apna paigham likhein">
-    <button onclick="sendMessage()">Send</button>
-    <button class="secondary" onclick="speak()">🔊 Mira ki awaaz suno</button>
-  </main>
-  <script>
-    function sendMessage() {
-      const input = document.getElementById('message');
-      const chat = document.getElementById('chat');
-      const value = input.value.trim();
-      if (!value) return;
-      const user = document.createElement('p');
-      user.textContent = 'Aap: ' + value;
-      chat.appendChild(user);
-      const reply = document.createElement('p');
-      reply.textContent = 'Mira: Shukriya! Main abhi demo mode mein hoon.';
-      chat.appendChild(reply);
-      input.value = '';
-      chat.scrollTop = chat.scrollHeight;
-    }
-    function speak() {
-      if (!('speechSynthesis' in window)) {
-        alert('Is browser mein voice support nahi hai.');
-        return;
-      }
-      const voice = new SpeechSynthesisUtterance(
-        'Assalam o alaikum! Main Mira hoon.'
-      );
-      voice.lang = 'ur-PK';
-      speechSynthesis.speak(voice);
-    }
-  </script>
+<main class="app">
+  <div class="avatar">✨</div>
+  <h1>Mira AI</h1>
+  <p class="subtitle">Assalam-o-alaikum! Main Mira hoon.</p>
+  <p class="status" id="status">● Ready to chat</p>
+
+  <div id="chat" aria-live="polite">
+    <div class="msg"><b>Mira:</b> Salam! Aap message likh sakte hain ya microphone try kar sakte hain.</div>
+  </div>
+
+  <input id="message" placeholder="Yahan apna paigham likhein">
+  <button id="sendBtn" onclick="sendMessage()">➤ Message Send Karein</button>
+  <button class="secondary" onclick="startListening()">🎤 Bol kar baat karein</button>
+  <button class="secondary" onclick="speakLast()">🔊 Mira ka jawab sunain</button>
+  <p class="note">Note: AI connection abhi set nahi hai. Microphone Android WebView mein permission ya extra setup maang sakta hai.</p>
+</main>
+
+<script>
+let lastReply = "Assalam-o-alaikum! Main Mira hoon.";
+const chat = document.getElementById("chat");
+const statusText = document.getElementById("status");
+
+function addMessage(who, text, mine=false) {
+  const div = document.createElement("div");
+  div.className = "msg" + (mine ? " me" : "");
+  const bold = document.createElement("b");
+  bold.textContent = who + ": ";
+  div.appendChild(bold);
+  div.appendChild(document.createTextNode(text));
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function getDemoReply(text) {
+  const t = text.toLowerCase();
+  if (t.includes("salam") || t.includes("assalam"))
+    return "Wa alaikum assalam! Aap kaise hain?";
+  if (t.includes("naam") || t.includes("name"))
+    return "Mera naam Mira hai.";
+  if (t.includes("kaise ho") || t.includes("how are you"))
+    return "Main theek hoon! Aap sunayein.";
+  if (t.includes("shukriya") || t.includes("thanks"))
+    return "Khushi hui! Main aapki madad ke liye yahan hoon.";
+  if (t.includes("time") || t.includes("waqt"))
+    return "Main abhi live waqt check nahi kar sakti.";
+  return "Aapka paigham mil gaya. Main abhi demo mode mein hoon; intelligent jawab dene ke liye AI service connect karni hogi.";
+}
+
+function sendMessage() {
+  const input = document.getElementById("message");
+  const value = input.value.trim();
+  if (!value) return;
+  addMessage("Aap", value, true);
+  lastReply = getDemoReply(value);
+  addMessage("Mira", lastReply);
+  input.value = "";
+  statusText.textContent = "● Demo mode";
+}
+
+document.getElementById("message").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") sendMessage();
+});
+
+function speakText(text) {
+  if (!("speechSynthesis" in window)) {
+    alert("Is app mein voice output supported nahi hai. Android TTS setup ki zaroorat ho sakti hai.");
+    return;
+  }
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ur-PK";
+  utterance.rate = 0.9;
+  speechSynthesis.speak(utterance);
+}
+
+function speakLast() {
+  speakText(lastReply);
+}
+
+function startListening() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Microphone recognition is WebView mein available nahi. Agle step mein Android speech plugin set karenge.");
+    statusText.textContent = "● Microphone setup required";
+    return;
+  }
+  const recognition = new SpeechRecognition();
+  recognition.lang = "ur-PK";
+  recognition.interimResults = false;
+  recognition.onstart = () => statusText.textContent = "● Sun rahi hoon...";
+  recognition.onresult = (event) => {
+    document.getElementById("message").value = event.results[0][0].transcript;
+    sendMessage();
+  };
+  recognition.onerror = () => {
+    statusText.textContent = "● Microphone error";
+    alert("Microphone nahi chala. Permission aur Android support check karna hoga.");
+  };
+  recognition.onend = () => statusText.textContent = "● Ready to chat";
+  try { recognition.start(); }
+  catch (e) { alert("Microphone start nahi hua. Dobara try karein."); }
+}
+</script>
 </body>
 </html>
-
