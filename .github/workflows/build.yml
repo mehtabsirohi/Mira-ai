@@ -57,10 +57,17 @@ jobs:
           EOF
 
       - name: Build APK
-        run: cd android && chmod +x gradlew && ./gradlew -I ../kotlin-resolution.init.gradle assembleDebug
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew -I ../kotlin-resolution.init.gradle assembleDebug
+          echo "APK files:"
+          find app/build/outputs/apk -type f -name "*.apk"
 
       - name: Upload Mira APK
         uses: actions/upload-artifact@v4
         with:
           name: Mira-AI-APK
-          path: android/a
+          path: android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+  
